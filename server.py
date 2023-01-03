@@ -9,18 +9,19 @@ import numpy as np
 
 
 # setting up session
-sess = tf.InteractiveSession()
+tf.compat.v1.disable_eager_execution()
+sess = tf.compat.v1.InteractiveSession()
 #prediction = neural_network_model(x)
 x , prediction, _ = createNetwork()
 #prediction = convolutional_neural_network(x)
-saver = tf.train.Saver()
-checkpoint = tf.train.get_checkpoint_state("model")
+saver = tf.compat.v1.train.Saver()
+checkpoint = tf.compat.v1.train.get_checkpoint_state("model")
 if checkpoint and checkpoint.model_checkpoint_path:
     s = saver.restore(sess,checkpoint.model_checkpoint_path)
     print("Successfully loaded the model:", checkpoint.model_checkpoint_path)
 else:
     print("Could not find old network weights")
-graph = tf.get_default_graph()
+graph = tf.compat.v1.get_default_graph()
 
 
 app = Flask(__name__)
@@ -32,7 +33,7 @@ def index():
 def  bestmove(input):
     global graph
     with graph.as_default():
-        data = (sess.run(tf.argmax(prediction.eval(session = sess,feed_dict={x:[input]}),1)))
+        data = (sess.run(tf.compat.v1.argmax(prediction.eval(session = sess,feed_dict={x:[input]}),1)))
     return data
 
 @app.route('/api/ticky', methods=['POST'])
@@ -43,7 +44,7 @@ def ticky_api():
     #print('data is ')
     #print(type(data))
     #print(data)
-    return jsonify(np.asscalar(bestmove(data)[0]))
+    return jsonify(np.array(bestmove(data)[0]).tolist())
 
 # @app.after_request
 # def add_header(r):

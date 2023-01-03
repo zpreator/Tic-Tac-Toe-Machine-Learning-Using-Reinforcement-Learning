@@ -16,6 +16,9 @@ import sys
 
 #os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+
+
+
 # Varibles 
 game_rows = rows = 3
 game_cols = cols = 3
@@ -28,15 +31,15 @@ draw_games = 0
 layer_1_w = 750
 layer_2_w = 750
 layer_3_w = 750
-
+tf.compat.v1.disable_eager_execution()
 
 def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev = 0.01)
-    return tf.Variable(initial)
+    initial = tf.compat.v1.truncated_normal(shape, stddev = 0.01)
+    return tf.compat.v1.Variable(initial)
 
 def bias_variable(shape):
-    initial = tf.constant(0.01, shape = shape)
-    return tf.Variable(initial)
+    initial = tf.compat.v1.constant(0.01, shape = shape)
+    return tf.compat.v1.Variable(initial)
 
 
 # greedy policy for selecting an action
@@ -151,16 +154,16 @@ def createNetwork():
     o_bais  = bias_variable([actions])
 
     # input Layer
-    x = tf.placeholder("float", [None, boardSize])
+    x = tf.compat.v1.placeholder("float", [None, boardSize])
 
     # hidden layers
-    h_layer1 = tf.nn.relu(tf.matmul(x,W_layer1) + b_layer1)
-    h_layer2 = tf.nn.relu(tf.matmul(h_layer1,W_layer2) + b_layer2)
-    h_layer3 = tf.nn.relu(tf.matmul(h_layer2,W_layer3) + b_layer3)
+    h_layer1 = tf.compat.v1.nn.relu(tf.compat.v1.matmul(x,W_layer1) + b_layer1)
+    h_layer2 = tf.compat.v1.nn.relu(tf.compat.v1.matmul(h_layer1,W_layer2) + b_layer2)
+    h_layer3 = tf.compat.v1.nn.relu(tf.compat.v1.matmul(h_layer2,W_layer3) + b_layer3)
 
     # output layer
-    y = tf.matmul(h_layer3,o_layer) + o_bais
-    prediction = tf.argmax(y[0])
+    y = tf.compat.v1.matmul(h_layer3,o_layer) + o_bais
+    prediction = tf.compat.v1.argmax(y[0])
 
     return x,y, prediction
 
@@ -172,24 +175,24 @@ def tainNetwork():
     inputState , Qoutputs, prediction = createNetwork()
 
     # calculate the loss
-    targetQOutputs = tf.placeholder("float",[None,actions])
-    loss =  tf.reduce_mean(tf.square(tf.subtract(targetQOutputs, Qoutputs)))
+    targetQOutputs = tf.compat.v1.placeholder("float",[None,actions])
+    loss =  tf.compat.v1.reduce_mean(tf.compat.v1.square(tf.compat.v1.subtract(targetQOutputs, Qoutputs)))
 
     # train the model to minimise the loss
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+    train_step = tf.compat.v1.train.AdamOptimizer(1e-4).minimize(loss)
 
     # creating a sesion
-    sess = tf.InteractiveSession()
+    sess = tf.compat.v1.InteractiveSession()
 
     # saving and loading networks
-    saver = tf.train.Saver()
-    sess.run(tf.global_variables_initializer())
+    saver = tf.compat.v1.train.Saver()
+    sess.run(tf.compat.v1.global_variables_initializer())
 
     # load a saved model
     step = 0
     iterations = 0
 
-    checkpoint = tf.train.get_checkpoint_state("model")
+    checkpoint = tf.compat.v1.train.get_checkpoint_state("model")
     if checkpoint and checkpoint.model_checkpoint_path:
         s = saver.restore(sess,checkpoint.model_checkpoint_path)
         print("Successfully loaded the model:", checkpoint.model_checkpoint_path)
